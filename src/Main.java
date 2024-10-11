@@ -9,33 +9,30 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 
 public class Main {
-    static String accessKey = "b250d7bc-cd76-41fd-988b-17a2a91706c9";
-    static String accessHeader = "X-Yandex-Weather-Key";
-    static String url = "https://api.weather.yandex.ru/v2/forecast";
-    static Scanner scanner = new Scanner(System.in);
+    private static final String accessKey = "b250d7bc-cd76-41fd-988b-17a2a91706c9";
+    private static final String accessHeader = "X-Yandex-Weather-Key";
+    private static final String url = "https://api.weather.yandex.ru/v2/forecast";
+    private static final Scanner scanner = new Scanner(System.in);
 
     public static void main(String[] args) throws IOException {
-        System.out.println("Если не хотите указывать конкретные координаты - можете пропустить нажатием Enter: ");
+        System.out.println("Если не хотите указывать конкретные координаты - можете пропустить нажатием Enter");
 
         String lat = input("Введите широту:");
-        String lon = "";
-        if (!lat.isEmpty()) {
-            lon = input("Введите долготу:");
-        }
-        String limit = input("Введите количество дней, для которых посчитать среднюю температуру (не боллее 7)");
+        String lon = lat.isEmpty() ? "" : input("Введите долготу:");
+        String limit = input("Введите количество дней, для которых посчитать среднюю температуру (не боллее 7):");
 
         String url = createUrl(lon, lat, limit);
         String responseStringBody = sendHttpRequest(url);
 
         if (responseStringBody != null) {
             System.out.println("Response Body: " + responseStringBody);
-            getResponse(responseStringBody);
+            getResponse(responseStringBody, limit);
         }
     }
 
     private static String input(String text){
         System.out.println(text);
-        return scanner.nextLine();
+        return scanner.nextLine().trim();
     }
 
     private static String createUrl(String lon, String lat, String limit) {
@@ -48,7 +45,7 @@ public class Main {
             newUrl.append("&limit=").append(limit);
         }
         if (lon.isEmpty() && !limit.isEmpty()) {
-            newUrl.append("?limit=");
+            newUrl.append("?limit=").append(limit);
         }
         return newUrl.toString();
     }
@@ -61,28 +58,30 @@ public class Main {
                     .GET()
                     .build();
 
-            try {
-                HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-                System.out.println("Response Code: " + response.statusCode());
-                return response.body();
-            } catch (IOException | InterruptedException e) {
-                System.err.println("Error making HTTP request: " + e.getMessage());
-                return null;
-            }
+
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            System.out.println("Response Code: " + response.statusCode());
+            return response.body();
+        } catch (IOException | InterruptedException e) {
+            System.err.println("Error making HTTP request: " + e.getMessage());
+            return null;
         }
     }
 
-    private static void getResponse(String responseBody) throws IOException {
+    private static void getResponse(String responseBody, String limit) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         JsonNode jsonResponse = mapper.readTree(responseBody);
         int temperature = jsonResponse.get("fact").get("temp").asInt();
+
         System.out.println("Температура сейчас: " + temperature);
 
         JsonNode forecasts = jsonResponse.get("forecasts");
-        getWeekTemp(forecasts);
+        if (!limit.isEmpty()) {
+            getWeekTemp(forecasts, limit);
+        }
     }
 
-    private static void getWeekTemp(JsonNode forecasts) {
+    private static void getWeekTemp(JsonNode forecasts, String limit) {
         int forecastSize = forecasts.size();
         double weekTemp = 0;
         double nightWeekTemp = 0;
