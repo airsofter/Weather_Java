@@ -14,7 +14,7 @@ public class Main {
     private static final String url = "https://api.weather.yandex.ru/v2/forecast";
     private static final Scanner scanner = new Scanner(System.in);
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
         System.out.println("Если не хотите указывать конкретные координаты - можете пропустить нажатием Enter");
 
         String lat = input("Введите широту:");
@@ -26,7 +26,11 @@ public class Main {
 
         if (responseStringBody != null) {
             System.out.println("Response Body: " + responseStringBody);
-            getResponse(responseStringBody, limit);
+            try {
+                getResponse(responseStringBody, limit);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
