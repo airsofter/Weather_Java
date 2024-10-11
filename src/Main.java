@@ -77,11 +77,11 @@ public class Main {
 
         JsonNode forecasts = jsonResponse.get("forecasts");
         if (!limit.isEmpty()) {
-            getWeekTemp(forecasts, limit);
+            getWeekTemp(forecasts);
         }
     }
 
-    private static void getWeekTemp(JsonNode forecasts, String limit) {
+    private static void getWeekTemp(JsonNode forecasts) {
         int forecastSize = forecasts.size();
         double weekTemp = 0;
         double nightWeekTemp = 0;
