@@ -9,7 +9,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 
 public class Main {
-    private static final String accessKey = "b250d7bc-cd76-41fd-988b-17a2a91706c9";
+    private static final String accessKey = "b250d7bc-cd76-41fd-988b-11232csd223";
     private static final String accessHeader = "X-Yandex-Weather-Key";
     private static final String url = "https://api.weather.yandex.ru/v2/forecast";
     private static final Scanner scanner = new Scanner(System.in);
